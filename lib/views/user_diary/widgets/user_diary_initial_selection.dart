@@ -82,8 +82,9 @@ class UserDiaryInitialSelection extends StatelessWidget {
           ],
         ),
         const Gap(32),
+        // Mito Verdade Question
         QuestionCard(
-          question: currentMyth.question,
+          myth: currentMyth,
         ),
       ],
     );
