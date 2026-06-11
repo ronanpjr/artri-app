@@ -5,7 +5,7 @@ export 'checkbox_group.dart';
 export 'custom_scale_selector.dart';
 export 'input_text.dart';
 export 'navbar.dart';
-export 'question_card.dart';
+export 'myth_truth_card.dart';
 export 'scale_selector.dart';
 export 'session_title.dart';
 export 'hint_indicator_tooltip.dart';

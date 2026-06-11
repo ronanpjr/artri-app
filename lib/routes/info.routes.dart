@@ -1,3 +1,4 @@
+import 'package:artriapp/models/myth.dart';
 import 'package:artriapp/models/route_session.dart';
 import 'package:artriapp/routes/index.dart';
 import 'package:artriapp/utils/router_keys.dart';
@@ -61,7 +62,13 @@ class InfoRoutes implements RoutesSession {
       GoRoute(
         parentNavigatorKey: RouterKeys.appRoutesKey,
         path: 'myths-truths',
-        builder: (context, state) => const MitosVerdadesInfoPage(),
+        builder: (context, state) {
+          final myth = state.extra as Myth?;
+
+          return MitosVerdadesInfoPage(
+            highlightedMyth: myth,
+          );
+        },
       ),
     ];
   }
