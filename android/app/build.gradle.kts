@@ -9,7 +9,7 @@ android {
     namespace = "com.example.artriapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-
+    buildToolsVersion = "36.0.0"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
