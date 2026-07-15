@@ -23,12 +23,18 @@ class NotificationService {
 
   final ReminderScheduler _scheduler = ReminderScheduler();
 
+  bool _initialized = false;
+
   NotificationService._();
 
   Future<void> init() async {
+    if (_initialized) return;
+    _initialized = true;
+
+    debugPrint('[NotificationService] Initializing...');
     tz_data.initializeTimeZones();
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
+    const androidSettings = AndroidInitializationSettings('launcher_icon');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -47,19 +53,26 @@ class NotificationService {
     final androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
-    await androidPlugin?.createNotificationChannel(
-      const AndroidNotificationChannel(
-        _channelId,
-        _channelName,
-        description: _channelDescription,
-        importance: Importance.high,
-        playSound: true,
-        enableVibration: true,
-      ),
-    );
+    if (androidPlugin != null) {
+      await androidPlugin.createNotificationChannel(
+        const AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          description: _channelDescription,
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+        ),
+      );
 
-    await androidPlugin?.requestNotificationsPermission();
-    await androidPlugin?.requestExactAlarmsPermission();
+      final notifGranted = await androidPlugin.requestNotificationsPermission();
+      debugPrint('[NotificationService] Notification permission: $notifGranted');
+
+      final exactGranted = await androidPlugin.requestExactAlarmsPermission();
+      debugPrint('[NotificationService] Exact alarm permission: $exactGranted');
+    }
+
+    debugPrint('[NotificationService] Initialized successfully');
   }
 
   int _notificationId(int remedyId) => remedyId;
@@ -71,7 +84,10 @@ class NotificationService {
     List<DaysOfWeek> daysOfWeek = const [],
   }) async {
     final timeParts = hour.split(':');
-    if (timeParts.length != 2) return;
+    if (timeParts.length < 2) {
+      debugPrint('[NotificationService] Invalid hour format: $hour');
+      return;
+    }
     final hourInt = int.tryParse(timeParts[0]) ?? 0;
     final minuteInt = int.tryParse(timeParts[1]) ?? 0;
 
@@ -81,13 +97,20 @@ class NotificationService {
       daysOfWeek: daysOfWeek,
     );
 
+    final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    final now = DateTime.now();
+
+    debugPrint('[NotificationService] schedule remedyId=$remedyId name=$remedyName '
+        'hour=$hour days=$daysOfWeek '
+        'scheduled=$scheduledDate (${scheduledDate.difference(now).inMinutes}min from now)');
+
     final androidDetails = AndroidNotificationDetails(
       _channelId,
       _channelName,
       channelDescription: _channelDescription,
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@mipmap/launcher_icon',
+      icon: 'launcher_icon',
     );
     final iosDetails = DarwinNotificationDetails();
     final details = NotificationDetails(
@@ -95,17 +118,39 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
-
     await flutterLocalNotificationsPlugin.zonedSchedule(
       _notificationId(remedyId),
       'Hora do Medicamento',
       'Está na hora de tomar $remedyName',
       tzScheduledDate,
       details,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+    );
+  }
+
+  Future<void> showImmediateNotification({
+    required int remedyId,
+    required String remedyName,
+    required String hour,
+    List<DaysOfWeek> daysOfWeek = const [],
+  }) async {
+    debugPrint('[NotificationService] showImmediate remedyId=$remedyId name=$remedyName');
+    await flutterLocalNotificationsPlugin.show(
+      _notificationId(remedyId) + 5000,
+      'Hora do Medicamento',
+      'Está na hora de tomar $remedyName',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          channelDescription: _channelDescription,
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: 'launcher_icon',
+        ),
+      ),
     );
   }
 

@@ -41,6 +41,7 @@ class RemedyViewModel extends ChangeNotifier {
     try {
       _allRemedies = await _remedyService.getRemedies();
       await _scheduleAllRemedies();
+      await _checkMissedNotifications();
     } catch (e) {
       debugPrint('Erro ao buscar medicamentos: $e');
       _errorMessage = 'Erro ao carregar medicamentos. Verifique sua conexão.';
@@ -111,6 +112,30 @@ class RemedyViewModel extends ChangeNotifier {
         hour: remedy.hour,
         daysOfWeek: remedy.daysOfWeek,
       );
+    }
+  }
+
+  Future<void> _checkMissedNotifications() async {
+    final now = DateTime.now();
+    final todayDayIndex = now.weekday - 1;
+
+    for (final remedy in _allRemedies) {
+      final timeParts = remedy.hour.split(':');
+      if (timeParts.length < 2) continue;
+      final hour = int.tryParse(timeParts[0]) ?? 0;
+      final minute = int.tryParse(timeParts[1]) ?? 0;
+
+      final todaySchedule = DateTime(now.year, now.month, now.day, hour, minute);
+
+      if (todaySchedule.isBefore(now) && remedy.daysOfWeek.any((d) => d.index == todayDayIndex)) {
+        debugPrint('[RemedyViewModel] Missed notification for: ${remedy.name} at $hour:$minute');
+        await _notificationService.showImmediateNotification(
+          remedyId: remedy.id,
+          remedyName: remedy.name,
+          hour: remedy.hour,
+          daysOfWeek: remedy.daysOfWeek,
+        );
+      }
     }
   }
 }
