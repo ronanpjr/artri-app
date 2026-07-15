@@ -23,7 +23,8 @@ class ExerciseRoutineStepView extends StatelessWidget {
             controlsVisibleAtStart: true,
           ),
         );
-        return SingleChildScrollView(           child: Padding(
+        return SingleChildScrollView(
+          child: Padding(
             padding: const EdgeInsets.only(bottom: 50.0),
             child: Column(
               spacing: 16,
