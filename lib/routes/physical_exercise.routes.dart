@@ -104,5 +104,40 @@ class PhysicalExerciseRoutes implements RoutesSession {
             ),
           ],
         ),
+        ShellRoute(
+          parentNavigatorKey: RouterKeys.appRoutesKey,
+          builder: (context, state, child) => PhysicalExerciseView(
+            title: 'Personalizado',
+            child: child,
+          ),
+          routes: [
+            GoRoute(
+              path: '/custom_routine/overview',
+              builder: (context, state) => const CustomRoutineOverviewPage(),
+              routes: [
+                GoRoute(
+                  path: ':exerciseId',
+                  builder: (context, state) => ExerciseRoutineStepView(
+                    key: ValueKey(state.pathParameters['exerciseId']),
+                  ),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: '/custom_routine/select',
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>;
+                return CategorySelectionView(
+                  categoryTitle: extra['title'] as String,
+                  categoryKey: extra['key'] as String,
+                );
+              },
+            ),
+            GoRoute(
+              path: '/custom_routine/advanced',
+              builder: (context, state) => const CustomRoutineAdvancedPage(),
+            ),
+          ],
+        ),
       ];
 }

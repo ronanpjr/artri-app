@@ -50,6 +50,12 @@ class GlobalProviders {
         syncService: Provider.of<HealthSyncService>(context, listen: false),
       ),
     ),
+    ChangeNotifierProvider(
+      create: (_) => CustomRoutineViewModel(),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => CustomRoutineAdvancedViewModel(),
+    ),
   ];
 
   static List<SingleChildWidget> getProviders() {
