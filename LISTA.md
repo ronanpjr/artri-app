@@ -1,3 +1,4 @@
+RONAN
 1. Bug encontrado:
 Login não funcionava corretamente
 
@@ -49,4 +50,27 @@ A correção seria simples, apenas conectar a funcionalidade já existente nos m
 7. Botão de Salvar (Dor, Fadiga, Sono, Inchaço) não funciona aparentemente 
 8. Toda vez que o app é fechado precisamos relogar, o ideal seria poder guardar o estado de logado para evitar esse atrito do usuário
 9. Inconsistencia de cores / design entre as páginas - o ideal é utilizar um tema constante e apenas chamar as cores desse tem
+
+
+
+MELISSA
+
+Problemas e bugs identificados:
+
+1. Página de configurações:
+     As funcionalidades de alterar email, alterar senha e permissões não funcionam
+3. Página de medicamentos:
+     É possível adicionar novos medicamentos, porém não há como salvá-los - eles não aparecem na lista
+4. O botão de exercícios na página inicial do aplicativo:
+     Não acontece nada ao ser clicado
+5. Os exercícios de nível (iniciante, intermediário e avançado), tanto para pés quanto mãoes não estão carregando o conteúdo.
+6. Assim como os vídeos de técnicas de relaxamento e respiração não estão carregando o conteúdo também
+
+Algumas sugestões de possíveis melhorias:
+
+1. Dentro da página de medicamentos não tem um botão pra voltar - isso poderia ser adicionado 
+2. Não fica claro se o quadro de evolução de dor é geral ou se é específico para alguma parte do corpo... Poderia especificar se é de alguma parte do corpo especificamente ou avisar, já que da maneira atual não tem uma opção de cadastrar o nível de dor de uma maneira geral
+	
+
+
 
