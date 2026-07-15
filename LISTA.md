@@ -65,12 +65,16 @@ Problemas e bugs identificados:
      Não acontece nada ao ser clicado
 5. Os exercícios de nível (iniciante, intermediário e avançado), tanto para pés quanto mãoes não estão carregando o conteúdo.
 6. Assim como os vídeos de técnicas de relaxamento e respiração não estão carregando o conteúdo também
+7. As interrogações na página de atividade física e em outras páginas também requerem que o usuário passe o mouse por cima, porém como é um aplicativo móvel isso não é possível e não é possível acessar essas informações.
 
 Algumas sugestões de possíveis melhorias:
 
 1. Dentro da página de medicamentos não tem um botão pra voltar - isso poderia ser adicionado 
 2. Não fica claro se o quadro de evolução de dor é geral ou se é específico para alguma parte do corpo... Poderia especificar se é de alguma parte do corpo especificamente ou avisar, já que da maneira atual não tem uma opção de cadastrar o nível de dor de uma maneira geral
-	
+
+
+
+screen recording: [link para screen recording](https://youtu.be/l8xoa_6v04c)
 
 
 
