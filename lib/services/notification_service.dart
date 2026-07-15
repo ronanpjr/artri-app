@@ -11,11 +11,19 @@ Future<void> notificationBackgroundHandler(NotificationResponse response) async 
 }
 
 class NotificationService {
+  static NotificationService? _instance;
+  static NotificationService get instance {
+    _instance ??= NotificationService._();
+    return _instance!;
+  }
+
   static const _channelId = 'artriapp_remedy_channel';
   static const _channelName = 'Lembretes de Medicamentos';
   static const _channelDescription = 'Notificações para lembrar de tomar os medicamentos';
 
   final ReminderScheduler _scheduler = ReminderScheduler();
+
+  NotificationService._();
 
   Future<void> init() async {
     tz_data.initializeTimeZones();

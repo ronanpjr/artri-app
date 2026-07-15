@@ -7,8 +7,7 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
 
-  final notificationService = NotificationService();
-  await notificationService.init();
+  await NotificationService.instance.init();
 
   runApp(App());
 }

@@ -9,7 +9,7 @@ class GlobalProviders {
     Provider(create: (context) => AuthService()),
     Provider(create: (context) => SecurityTokenService()),
     Provider(create: (context) => PhysicalExercisesService()),
-    Provider(create: (context) => NotificationService()),
+    Provider(create: (context) => NotificationService.instance),
     Provider(create: (context) => RemedyService()),
   ];
 
