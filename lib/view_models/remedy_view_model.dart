@@ -1,8 +1,12 @@
 import 'package:artriapp/models/api_responses/remedy.dart';
+import 'package:artriapp/routes/not_logged.routes.dart';
 import 'package:artriapp/services/notification_service.dart';
 import 'package:artriapp/services/remedy_service.dart';
 import 'package:artriapp/utils/enums/days_of_week.dart';
+import 'package:artriapp/utils/exceptions.dart';
+import 'package:artriapp/utils/router_keys.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 
 class RemedyViewModel extends ChangeNotifier {
@@ -41,8 +45,12 @@ class RemedyViewModel extends ChangeNotifier {
     try {
       _allRemedies = await _remedyService.getRemedies();
       await _scheduleAllRemedies();
-      await _checkMissedNotifications();
     } catch (e) {
+      if (e is AuthExpiredException) {
+        debugPrint('[RemedyViewModel] Auth expired, redirecting to login');
+        RouterKeys.appRoutesKey.currentContext?.go(NotLoggedRoutes.login);
+        return;
+      }
       debugPrint('Erro ao buscar medicamentos: $e');
       _errorMessage = 'Erro ao carregar medicamentos. Verifique sua conexão.';
     } finally {
@@ -83,6 +91,10 @@ class RemedyViewModel extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
+      if (e is AuthExpiredException) {
+        RouterKeys.appRoutesKey.currentContext?.go(NotLoggedRoutes.login);
+        return;
+      }
       debugPrint('Erro ao salvar medicamento: $e');
       _errorMessage = 'Erro ao salvar medicamento. Tente novamente.';
       notifyListeners();
@@ -98,6 +110,10 @@ class RemedyViewModel extends ChangeNotifier {
       await _notificationService.cancelReminder(id);
       notifyListeners();
     } catch (e) {
+      if (e is AuthExpiredException) {
+        RouterKeys.appRoutesKey.currentContext?.go(NotLoggedRoutes.login);
+        return;
+      }
       debugPrint('Erro ao deletar medicamento: $e');
       _errorMessage = 'Erro ao deletar medicamento. Tente novamente.';
       notifyListeners();
@@ -112,30 +128,6 @@ class RemedyViewModel extends ChangeNotifier {
         hour: remedy.hour,
         daysOfWeek: remedy.daysOfWeek,
       );
-    }
-  }
-
-  Future<void> _checkMissedNotifications() async {
-    final now = DateTime.now();
-    final todayDayIndex = now.weekday - 1;
-
-    for (final remedy in _allRemedies) {
-      final timeParts = remedy.hour.split(':');
-      if (timeParts.length < 2) continue;
-      final hour = int.tryParse(timeParts[0]) ?? 0;
-      final minute = int.tryParse(timeParts[1]) ?? 0;
-
-      final todaySchedule = DateTime(now.year, now.month, now.day, hour, minute);
-
-      if (todaySchedule.isBefore(now) && remedy.daysOfWeek.any((d) => d.index == todayDayIndex)) {
-        debugPrint('[RemedyViewModel] Missed notification for: ${remedy.name} at $hour:$minute');
-        await _notificationService.showImmediateNotification(
-          remedyId: remedy.id,
-          remedyName: remedy.name,
-          hour: remedy.hour,
-          daysOfWeek: remedy.daysOfWeek,
-        );
-      }
     }
   }
 }

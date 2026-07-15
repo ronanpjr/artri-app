@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:artriapp/models/api_responses/remedy.dart';
+import 'package:artriapp/services/auth_service.dart';
 import 'package:artriapp/services/security_token_service.dart';
 import 'package:artriapp/utils/enums/days_of_week.dart';
 import 'package:artriapp/utils/enums/security_tokens.dart';
 import 'package:artriapp/utils/env_variables.dart';
+import 'package:artriapp/utils/exceptions.dart';
 import 'package:http/http.dart' as http;
 
 class RemedyService {
+  static const _timeout = Duration(seconds: 15);
   final String baseUrl = Environment.apiUrl;
   final SecurityTokenService _tokenService = SecurityTokenService();
+  final AuthService _authService = AuthService();
 
   Future<Map<String, String>> _authHeaders() async {
     final token = await _tokenService.getToken(SecurityToken.accessToken);
@@ -18,12 +23,37 @@ class RemedyService {
     };
   }
 
+  Future<void> _tryRefreshToken() async {
+    final oldRefresh = await _tokenService.getToken(SecurityToken.refreshToken);
+    if (oldRefresh == null || oldRefresh.isEmpty) {
+      await _tokenService.deleteAllTokens();
+      throw AuthExpiredException();
+    }
+    try {
+      final response = await _authService.refreshAuthToken(oldRefresh);
+      await _tokenService.saveToken(response.accessToken, SecurityToken.accessToken);
+      await _tokenService.saveToken(response.refreshToken, SecurityToken.refreshToken);
+    } catch (e) {
+      await _tokenService.deleteAllTokens();
+      throw AuthExpiredException();
+    }
+  }
+
   Future<List<Remedy>> getRemedies() async {
-    final headers = await _authHeaders();
-    final response = await http.get(
+    var headers = await _authHeaders();
+    var response = await http.get(
       Uri.parse('$baseUrl/remedies/'),
       headers: headers,
-    );
+    ).timeout(_timeout);
+
+    if (response.statusCode == 401) {
+      await _tryRefreshToken();
+      headers = await _authHeaders();
+      response = await http.get(
+        Uri.parse('$baseUrl/remedies/'),
+        headers: headers,
+      ).timeout(_timeout);
+    }
 
     if (response.statusCode != 200) {
       throw Exception('Falha ao buscar medicamentos: ${response.statusCode}');
@@ -40,8 +70,8 @@ class RemedyService {
     required String hour,
     required DaysOfWeek dayOfWeek,
   }) async {
-    final headers = await _authHeaders();
-    final body = jsonEncode({
+    var headers = await _authHeaders();
+    var body = jsonEncode({
       'name': name,
       'description': description.isEmpty ? 'Sem descrição' : description,
       'quantity': quantity,
@@ -49,11 +79,28 @@ class RemedyService {
       'days_of_week': dayOfWeek.apiValue,
     });
 
-    final response = await http.post(
+    var response = await http.post(
       Uri.parse('$baseUrl/remedies/'),
       headers: headers,
       body: body,
-    );
+    ).timeout(_timeout);
+
+    if (response.statusCode == 401) {
+      await _tryRefreshToken();
+      headers = await _authHeaders();
+      body = jsonEncode({
+        'name': name,
+        'description': description.isEmpty ? 'Sem descrição' : description,
+        'quantity': quantity,
+        'hour': hour,
+        'days_of_week': dayOfWeek.apiValue,
+      });
+      response = await http.post(
+        Uri.parse('$baseUrl/remedies/'),
+        headers: headers,
+        body: body,
+      ).timeout(_timeout);
+    }
 
     if (response.statusCode != 201) {
       final errorBody = response.body;
@@ -64,11 +111,20 @@ class RemedyService {
   }
 
   Future<void> deleteRemedy(int id) async {
-    final headers = await _authHeaders();
-    final response = await http.delete(
+    var headers = await _authHeaders();
+    var response = await http.delete(
       Uri.parse('$baseUrl/remedies/$id/'),
       headers: headers,
-    );
+    ).timeout(_timeout);
+
+    if (response.statusCode == 401) {
+      await _tryRefreshToken();
+      headers = await _authHeaders();
+      response = await http.delete(
+        Uri.parse('$baseUrl/remedies/$id/'),
+        headers: headers,
+      ).timeout(_timeout);
+    }
 
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception('Falha ao deletar medicamento: ${response.statusCode}');

@@ -2,6 +2,7 @@ import 'package:artriapp/models/api_responses/remedy.dart';
 import 'package:artriapp/services/notification_service.dart';
 import 'package:artriapp/services/remedy_service.dart';
 import 'package:artriapp/utils/enums/days_of_week.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,9 +12,14 @@ void main() {
   group('Remédio + Notificação (Integração)', () {
     Remedy? createdRemedy;
 
+    setUpAll(() async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      await dotenv.load(fileName: '.env');
+    });
+
     setUp(() {
       remedyService = RemedyService();
-      notificationService = NotificationService();
+      notificationService = NotificationService.instance;
     });
 
     tearDown(() async {
@@ -27,7 +33,7 @@ void main() {
 
     test(
       'criar remédio via API e verificar agendamento de notificação',
-      () async {
+          () async {
         // Tenta criar um remédio na API real
         try {
           createdRemedy = await remedyService.createRemedy(
@@ -35,7 +41,7 @@ void main() {
             description: 'Remédio de teste para integração',
             quantity: 1,
             hour: '08:00',
-            daysOfWeek: DaysOfWeek.values.toList(),
+            dayOfWeek: DaysOfWeek.values.first,
           );
         } catch (e) {
           // API não disponível ou sem auth - pula o teste
@@ -64,15 +70,15 @@ void main() {
 
     test(
       'buscar lista de remédios da API', () async {
-        List<Remedy> remedies;
-        try {
-          remedies = await remedyService.getRemedies();
-        } catch (e) {
-          return;
-        }
+      List<Remedy> remedies;
+      try {
+        remedies = await remedyService.getRemedies();
+      } catch (e) {
+        return;
+      }
 
-        expect(remedies, isA<List<Remedy>>());
-      },
+      expect(remedies, isA<List<Remedy>>());
+    },
       timeout: const Timeout(Duration(seconds: 15)),
     );
   });
