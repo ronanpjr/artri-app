@@ -20,7 +20,9 @@ Logs dos testes:
 
 Fixes realizados:
 1. InputText: virou StatefulWidget para não apagar o texto ao abrir o teclado.
+
 2. LoginViewModel: adicionado notifyListeners() para a interface reconhecer o que foi digitado.
+
 3. Removidos o espaço e as aspas do .env
 
 
@@ -36,10 +38,14 @@ para baixo, seguir a parte inferior central como sendo a localização das açõ
 
 
 3. Problema de visibilidade de erros no app: Ao clicar no botão de login não existe mensagem de senha / usuário inválido.
+
 4. Botão de voltar não funciona, e tem telas sem botão de voltar, quando voltamos pelo gesto / botão de voltar do android, o app fecha apenas.
 
 5. Problema na API do backend - email hardcodado para apenas printar no console
+
 6. Selecionando mais de 2 tipos de dor, o botão de salvar some (na verdade ele ainda é acessível scrollando mas apenas no topo da tela)
+
+7. 
 ```dart
 // Em lib/views/user_diary/widgets/user_level_selection_with_options.dart
 ConfirmationButtons(
@@ -48,9 +54,9 @@ ConfirmationButtons(
 ), 
 ```
 A correção seria simples, apenas conectar a funcionalidade já existente nos métodos de enviar relatório à interface.
-7. Botão de Salvar (Dor, Fadiga, Sono, Inchaço) não funciona aparentemente 
-8. Toda vez que o app é fechado precisamos relogar, o ideal seria poder guardar o estado de logado para evitar esse atrito do usuário
-9. Inconsistencia de cores / design entre as páginas - o ideal é utilizar um tema constante e apenas chamar as cores desse tem
+
+9. Toda vez que o app é fechado precisamos relogar, o ideal seria poder guardar o estado de logado para evitar esse atrito do usuário
+10. Inconsistencia de cores / design entre as páginas - o ideal é utilizar um tema constante e apenas chamar as cores desse tem
 
 
 
