@@ -45,7 +45,8 @@ para baixo, seguir a parte inferior central como sendo a localização das açõ
 
 6. Selecionando mais de 2 tipos de dor, o botão de salvar some (na verdade ele ainda é acessível scrollando mas apenas no topo da tela)
 
-7. 
+  
+7. Botão de Salvar (Dor, Fadiga, Sono, Inchaço) não funciona aparentemente.
 ```dart
 // Em lib/views/user_diary/widgets/user_level_selection_with_options.dart
 ConfirmationButtons(
