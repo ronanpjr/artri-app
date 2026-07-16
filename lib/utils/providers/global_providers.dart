@@ -1,11 +1,10 @@
 import 'package:artriapp/database/app_database.dart';
 import 'package:artriapp/repositories/health_repository.dart';
 import 'package:artriapp/services/index.dart';
+import 'package:artriapp/view_models/diary_view_model.dart';
 import 'package:artriapp/view_models/index.dart';
-import 'package:artriapp/view_models/remedy_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:artriapp/view_models/diary_view_model.dart';
 
 class GlobalProviders {
   final _serviceProviders = <SingleChildWidget>[
@@ -27,6 +26,8 @@ class GlobalProviders {
         repository: Provider.of<HealthRepository>(context, listen: false),
       ),
     ),
+    Provider(create: (context) => NotificationService.instance),
+    Provider(create: (context) => RemedyService()),
   ];
 
   final _viewModelProviders = <SingleChildWidget>[
@@ -42,7 +43,10 @@ class GlobalProviders {
       ),
     ),
     ChangeNotifierProvider(
-      create: (context) => RemedyViewModel(),
+      create: (context) => RemedyViewModel(
+        notificationService: Provider.of<NotificationService>(context, listen: false),
+        remedyService: Provider.of<RemedyService>(context, listen: false),
+      ),
     ),
     ChangeNotifierProvider(create: (_) => DiaryViewModel()),
     ChangeNotifierProvider(
