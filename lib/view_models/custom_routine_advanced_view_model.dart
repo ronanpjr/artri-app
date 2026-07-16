@@ -1,6 +1,7 @@
 import 'package:artriapp/models/index.dart';
+import 'package:artriapp/services/physical_exercises_service.dart';
 import 'package:artriapp/utils/enums/index.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class CustomRoutineAdvancedViewModel extends ChangeNotifier {
   final List<String> categories = const [
@@ -21,13 +22,69 @@ class CustomRoutineAdvancedViewModel extends ChangeNotifier {
     'alongamento': 'Alongamento',
   };
 
+  static const Map<String, String> _categoryNameMap = {
+    'mobilidade': 'MOBILIDADE',
+    'aquecimento': 'AQUECIMENTO',
+    'pernas': 'PERNAS',
+    'bracos': 'BRAÇOS',
+    'tronco': 'TRONCO',
+    'alongamento': 'ALONGAMENTO',
+  };
+
   final Map<String, List<Exercise>> _categoryExercises = {};
   final Set<int> _selectedExerciseIds = {};
   String _searchQuery = '';
   String? _selectedCategory;
+  bool isLoading = false;
 
-  CustomRoutineAdvancedViewModel() {
+  final PhysicalExercisesService _exerciseService;
+
+  CustomRoutineAdvancedViewModel(this._exerciseService) {
     _initMockData();
+  }
+
+  Future<void> initCatalog() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final trainings = await _exerciseService.getTrainings();
+      final catalog = await _exerciseService.getExercises();
+
+      if (trainings.isNotEmpty && catalog.isNotEmpty) {
+        _categoryExercises.clear();
+        for (final cat in categories) {
+          final catName = _categoryNameMap[cat] ?? cat.toUpperCase();
+
+          // Find matching trainings that contain both "PERSONALIDADO" and category name
+          final matchingTrainings = trainings.where((t) =>
+              t.name.toUpperCase().contains('PERSONALIDADO') &&
+              t.name.toUpperCase().contains(catName));
+
+          final categoryExercises = <Exercise>[];
+
+          for (final t in matchingTrainings) {
+            for (final exerciseId in t.exercises) {
+              final exercise = catalog.firstWhere(
+                (e) => e.id == exerciseId,
+                orElse: () => null as dynamic,
+              );
+              if (exercise != null &&
+                  !categoryExercises.any((e) => e.id == exercise.id)) {
+                categoryExercises.add(exercise);
+              }
+            }
+          }
+
+          _categoryExercises[cat] = categoryExercises;
+        }
+      }
+    } catch (e) {
+      debugPrint('[CustomRoutineAdvancedViewModel] Failed to fetch catalog: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   void _initMockData() {

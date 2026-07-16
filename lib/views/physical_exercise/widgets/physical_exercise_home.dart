@@ -53,7 +53,7 @@ class PhysicalExerciseHome extends StatelessWidget {
               ),
               ExerciseButton(
                 onClick: () =>
-                    context.push('/custom_routine/overview'),
+                    context.push('/custom_routine/level_select'),
                 gradientColors: AppGradients.greenToNeutral,
                 buttonText: 'Personalizados',
               ),
@@ -61,7 +61,7 @@ class PhysicalExerciseHome extends StatelessWidget {
                 onClick: () =>
                     context.push('/custom_routine/advanced'),
                 gradientColors: AppGradients.greenToNeutral,
-                buttonText: 'Personalizados Avançado',
+                buttonText: 'Treino Livre',
               ),
             ],
           ),

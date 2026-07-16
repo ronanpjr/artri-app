@@ -1,11 +1,24 @@
+import 'package:artriapp/models/index.dart';
 import 'package:artriapp/services/physical_exercises_service.dart';
-import 'package:artriapp/utils/index.dart';
+import 'package:artriapp/utils/enums/index.dart';
 import 'package:artriapp/view_models/index.dart';
 import 'package:artriapp/views/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+
+class MockPhysicalExercisesService extends PhysicalExercisesService {
+  @override
+  Future<List<Training>> getTrainings() async {
+    return [];
+  }
+
+  @override
+  Future<List<Exercise>> getExercises() async {
+    return [];
+  }
+}
 
 Widget _createTestApp({
   required CustomRoutineAdvancedViewModel advancedVM,
@@ -34,8 +47,9 @@ void main() {
   });
 
   setUp(() {
-    advancedVM = CustomRoutineAdvancedViewModel();
-    physicalVM = PhysicalExercisesViewModel(PhysicalExercisesService());
+    final mockService = MockPhysicalExercisesService();
+    advancedVM = CustomRoutineAdvancedViewModel(mockService);
+    physicalVM = PhysicalExercisesViewModel(mockService);
   });
 
   group('CustomRoutineAdvancedPage Tests', () {
@@ -50,7 +64,7 @@ void main() {
       await tester.pump();
 
       // Check title and descriptions
-      expect(find.text('Personalizados Avançado'), findsOneWidget);
+      expect(find.text('Treino Livre'), findsOneWidget);
       expect(
         find.textContaining('Selecione os exercícios que deseja incluir'),
         findsOneWidget,

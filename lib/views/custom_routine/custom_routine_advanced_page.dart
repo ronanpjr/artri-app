@@ -17,6 +17,14 @@ class _CustomRoutineAdvancedPageState extends State<CustomRoutineAdvancedPage> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CustomRoutineAdvancedViewModel>().initCatalog();
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -25,6 +33,13 @@ class _CustomRoutineAdvancedPageState extends State<CustomRoutineAdvancedPage> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<CustomRoutineAdvancedViewModel>();
+    if (viewModel.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     final physicalExercisesVM = Provider.of<PhysicalExercisesViewModel>(context, listen: false);
     final double width = MediaQuery.sizeOf(context).width;
 
@@ -40,7 +55,7 @@ class _CustomRoutineAdvancedPageState extends State<CustomRoutineAdvancedPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
-                'Personalizados Avançado',
+                'Treino Livre',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.montserrat(
                   textStyle: const TextStyle(
@@ -236,7 +251,7 @@ class _CustomRoutineAdvancedPageState extends State<CustomRoutineAdvancedPage> {
                         final exercises = viewModel.generateRoutine();
                         physicalExercisesVM.setCustomRoutine(exercises);
                         if (physicalExercisesVM.currentExercise != null) {
-                          context.go('/custom_routine/overview/${physicalExercisesVM.currentExercise!.id}');
+                          context.go('/custom_routine/advanced/${physicalExercisesVM.currentExercise!.id}');
                         }
                       }
                     : null,
