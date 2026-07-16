@@ -8,24 +8,26 @@ class CustomRoutineViewModel extends ChangeNotifier {
   CustomRoutineTemplate? currentTemplate;
   final Map<String, List<Exercise>> selectedExercises = {};
   List<Exercise> catalog = [];
+  bool isLoading = false;
 
   CustomRoutineViewModel(this._exerciseService);
 
-  /// Maps exercise IDs to category keys (mock until API supports categories).
-  static const Map<int, String> _exerciseCategoryMap = {
-    1001: 'mobilidade', 1002: 'mobilidade', 1003: 'mobilidade',
-    1004: 'mobilidade', 1005: 'mobilidade',
-    2001: 'aquecimento', 2002: 'aquecimento', 2003: 'aquecimento',
-    3001: 'pernas', 3002: 'pernas', 3003: 'pernas',
-    4001: 'bracos', 4002: 'bracos', 4003: 'bracos',
-    4004: 'bracos', 4005: 'bracos',
-    5001: 'tronco', 5002: 'tronco', 5003: 'tronco',
-    6001: 'alongamento', 6002: 'alongamento', 6003: 'alongamento',
+  /// Maps a level key to the segment used in training names on the API.
+  static const Map<String, String> _levelNameMap = {
+    'iniciante': 'INICIANTE',
+    'intermediario': 'INTERMEDIÁRIO',
+    'avancado': 'AVANÇADO',
   };
 
-  String _categoryForExercise(Exercise exercise) {
-    return _exerciseCategoryMap[exercise.id] ?? 'outros';
-  }
+  /// Maps a category key to the segment used in training names on the API.
+  static const Map<String, String> _categoryNameMap = {
+    'mobilidade': 'MOBILIDADE',
+    'aquecimento': 'AQUECIMENTO',
+    'pernas': 'PERNAS',
+    'bracos': 'BRAÇOS',
+    'tronco': 'TRONCO',
+    'alongamento': 'ALONGAMENTO',
+  };
 
   List<Exercise> exercisesForCategory(String categoryKey) {
     return _categoryCatalog[categoryKey] ?? [];
@@ -38,6 +40,9 @@ class CustomRoutineViewModel extends ChangeNotifier {
   Map<String, List<Exercise>> _categoryCatalog = {};
 
   Future<void> initRoutine(String level) async {
+    isLoading = true;
+    notifyListeners();
+
     currentTemplate = CustomRoutineTemplate.mock(level);
     selectedExercises.clear();
     _categoryCatalog.clear();
@@ -49,17 +54,33 @@ class CustomRoutineViewModel extends ChangeNotifier {
     }
 
     try {
+      final trainings = await _exerciseService.getTrainings();
       catalog = await _exerciseService.getExercises();
-      for (final exercise in catalog) {
-        final cat = _categoryForExercise(exercise);
-        if (_categoryCatalog.containsKey(cat)) {
-          _categoryCatalog[cat]!.add(exercise);
+
+      final levelName = _levelNameMap[level] ?? 'INICIANTE';
+
+      for (final cat in currentTemplate!.categories) {
+        final catName = _categoryNameMap[cat.key] ?? cat.key.toUpperCase();
+
+        // Find the matching training by checking the training name contains
+        // both the level and category segments (e.g. "PERSONALIDADO ... INICIANTE ... MOBILIDADE").
+        final matchingTrainings = trainings.where((t) =>
+            t.name.toUpperCase().contains('PERSONALIDADO') &&
+            t.name.toUpperCase().contains(levelName) &&
+            t.name.toUpperCase().contains(catName));
+
+        if (matchingTrainings.isNotEmpty) {
+          final training = matchingTrainings.first;
+          final categoryExercises =
+              catalog.where((e) => training.exercises.contains(e.id)).toList();
+          _categoryCatalog[cat.key] = categoryExercises;
         }
       }
     } catch (e) {
       debugPrint('[CustomRoutineViewModel] Failed to fetch catalog: $e');
     }
 
+    isLoading = false;
     notifyListeners();
   }
 

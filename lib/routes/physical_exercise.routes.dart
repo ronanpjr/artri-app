@@ -106,14 +106,37 @@ class PhysicalExerciseRoutes implements RoutesSession {
         ),
         ShellRoute(
           parentNavigatorKey: RouterKeys.appRoutesKey,
-          builder: (context, state, child) => PhysicalExerciseView(
-            title: 'Personalizado',
-            child: child,
-          ),
+          builder: (context, state, child) {
+            String? subtitle;
+            final path = state.uri.path;
+            if (path.startsWith('/custom_routine/advanced')) {
+              subtitle = 'Treino Livre';
+            } else if (state.pathParameters['level'] != null) {
+              final level = state.pathParameters['level'];
+              if (level == 'iniciante') {
+                subtitle = 'Iniciante';
+              } else if (level == 'intermediario') {
+                subtitle = 'Intermediário';
+              } else if (level == 'avancado') {
+                subtitle = 'Avançado';
+              }
+            }
+            return PhysicalExerciseView(
+              title: 'Personalizado',
+              child: child,
+              subtitle: subtitle,
+            );
+          },
           routes: [
             GoRoute(
-              path: '/custom_routine/overview',
-              builder: (context, state) => const CustomRoutineOverviewPage(),
+              path: '/custom_routine/level_select',
+              builder: (context, state) => const CustomRoutineLevelSelectPage(),
+            ),
+            GoRoute(
+              path: '/custom_routine/overview/:level',
+              builder: (context, state) => CustomRoutineOverviewPage(
+                level: state.pathParameters['level'] ?? 'iniciante',
+              ),
               routes: [
                 GoRoute(
                   path: ':exerciseId',
@@ -136,6 +159,14 @@ class PhysicalExerciseRoutes implements RoutesSession {
             GoRoute(
               path: '/custom_routine/advanced',
               builder: (context, state) => const CustomRoutineAdvancedPage(),
+              routes: [
+                GoRoute(
+                  path: ':exerciseId',
+                  builder: (context, state) => ExerciseRoutineStepView(
+                    key: ValueKey(state.pathParameters['exerciseId']),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

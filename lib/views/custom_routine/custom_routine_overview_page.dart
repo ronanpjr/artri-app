@@ -6,13 +6,36 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-class CustomRoutineOverviewPage extends StatelessWidget {
-  const CustomRoutineOverviewPage({super.key});
+class CustomRoutineOverviewPage extends StatefulWidget {
+  final String level;
+  const CustomRoutineOverviewPage({super.key, required this.level});
+
+  @override
+  State<CustomRoutineOverviewPage> createState() =>
+      _CustomRoutineOverviewPageState();
+}
+
+class _CustomRoutineOverviewPageState extends State<CustomRoutineOverviewPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final vm = context.read<CustomRoutineViewModel>();
+      final template = vm.currentTemplate;
+      if (template == null || template.level.toLowerCase() != widget.level.toLowerCase()) {
+        vm.initRoutine(widget.level);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final customViewModel = context.watch<CustomRoutineViewModel>();
     final physicalExercisesVM = Provider.of<PhysicalExercisesViewModel>(context, listen: false);
+
+    if (customViewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     final canStart = customViewModel.canStartRoutine();
 
@@ -109,7 +132,7 @@ class CustomRoutineOverviewPage extends StatelessWidget {
                       final exercises = customViewModel.generateFinalRoutine();
                       physicalExercisesVM.setCustomRoutine(exercises);
                       if (physicalExercisesVM.currentExercise != null) {
-                        context.go('/custom_routine/overview/${physicalExercisesVM.currentExercise!.id}');
+                        context.go('/custom_routine/overview/${widget.level}/${physicalExercisesVM.currentExercise!.id}');
                       }
                     }
                   : null,

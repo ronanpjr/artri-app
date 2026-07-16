@@ -56,7 +56,9 @@ class GlobalProviders {
       ),
     ),
     ChangeNotifierProvider(
-      create: (_) => CustomRoutineAdvancedViewModel(),
+      create: (context) => CustomRoutineAdvancedViewModel(
+        Provider.of<PhysicalExercisesService>(context, listen: false),
+      ),
     ),
   ];
 
