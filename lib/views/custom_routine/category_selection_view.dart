@@ -19,8 +19,10 @@ class CategorySelectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final customViewModel = context.watch<CustomRoutineViewModel>();
-    final category = customViewModel.categories.firstWhere((c) => c.key == categoryKey);
-    final exercises = customViewModel.getExercisesForCategory(categoryKey);
+    final template = customViewModel.currentTemplate;
+    if (template == null) return const SizedBox.shrink();
+    final category = template.categories.firstWhere((c) => c.key == categoryKey);
+    final exercises = customViewModel.exercisesForCategory(categoryKey);
 
     final double width = MediaQuery.sizeOf(context).width;
 
@@ -45,7 +47,7 @@ class CategorySelectionView extends StatelessWidget {
           for (final exercise in exercises) ...[
             GestureDetector(
               onTap: () {
-                customViewModel.toggleExercise(categoryKey, exercise.id);
+                customViewModel.toggleExercise(exercise, categoryKey);
               },
               behavior: HitTestBehavior.opaque,
               child: Padding(
@@ -80,7 +82,7 @@ class CategorySelectionView extends StatelessWidget {
                     Checkbox(
                       value: customViewModel.isExerciseSelected(categoryKey, exercise.id),
                       onChanged: (bool? value) {
-                        customViewModel.toggleExercise(categoryKey, exercise.id);
+                        customViewModel.toggleExercise(exercise, categoryKey);
                       },
                       activeColor: AppColors.mediumGreen,
                       checkColor: Colors.white,

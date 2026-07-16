@@ -34,7 +34,7 @@ class CustomRoutineOverviewPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          for (final category in customViewModel.categories) ...[
+          for (final category in customViewModel.currentTemplate?.categories ?? []) ...[
             GestureDetector(
               onTap: () {
                 context.push('/custom_routine/select', extra: {
