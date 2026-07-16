@@ -3,21 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-class LevelSelectorDialog extends StatelessWidget {
+class LevelSelectorDialog extends StatefulWidget {
   const LevelSelectorDialog({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
-    var videoController = YoutubePlayerController(
-      initialVideoId: 'apuX_N3jpw0',
-      flags: const YoutubePlayerFlags(
-        autoPlay: false,
-        controlsVisibleAtStart: true,
-        disableDragSeek: true,
-      ),
+  State<LevelSelectorDialog> createState() => _LevelSelectorDialogState();
+}
+
+class _LevelSelectorDialogState extends State<LevelSelectorDialog> {
+  late final YoutubePlayerController _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _videoController = YoutubePlayerController.fromVideoId(
+      videoId: 'apuX_N3jpw0',
+      autoPlay: false,
     );
+  }
+
+  @override
+  void dispose() {
+    _videoController.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Dialog(
       insetPadding: EdgeInsets.fromLTRB(
@@ -69,7 +83,7 @@ class LevelSelectorDialog extends StatelessWidget {
                         ],
                       ),
                     ),
-                    YoutubePlayer(controller: videoController),
+                    YoutubePlayer(controller: _videoController),
                     RichText(
                       text: TextSpan(
                         style: GoogleFonts.montserrat(

@@ -11,34 +11,30 @@ class ExerciseRoutineStepView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<PhysicalExercisesViewModel>(
       builder: (context, viewModel, child) {
-        var exercise = viewModel.currentExercise;
+        final exercise = viewModel.currentExercise;
+        if (exercise == null) return const SizedBox.shrink();
 
-        var videoController = YoutubePlayerController(
-          initialVideoId: YoutubePlayer.convertUrlToId(
-                exercise!.tutorialLink,
+        final videoController = YoutubePlayerController.fromVideoId(
+          videoId: YoutubePlayerController.convertUrlToId(
+                exercise.tutorialLink,
               ) ??
               'IxX_QHay02M',
-          flags: const YoutubePlayerFlags(
-            autoPlay: false,
-            controlsVisibleAtStart: true,
-          ),
+          autoPlay: false,
         );
         return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 50.0),
-            child: Column(
-              spacing: 16,
-              children: [
-                YoutubePlayer(controller: videoController),
-                SessionTitle(title: exercise.name.split('-').first.trim()),
-                ExerciseSetProperties(
-                  details: exercise.details,
-                ),
-                ExerciseSetDetails(
-                  exerciseDescription: exercise.description,
-                ),
-              ],
-            ),
+          padding: const EdgeInsets.only(bottom: 50.0),
+          child: Column(
+            spacing: 16,
+            children: [
+              YoutubePlayer(controller: videoController),
+              SessionTitle(title: exercise.name.split('-').first.trim()),
+              ExerciseSetProperties(
+                details: exercise.details,
+              ),
+              ExerciseSetDetails(
+                exerciseDescription: exercise.description,
+              ),
+            ],
           ),
         );
       },
